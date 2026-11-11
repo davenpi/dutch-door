@@ -1,0 +1,19 @@
+{
+  "name": "vestibule",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A front door for AI agents, plus a neutral blind-match arbiter. Working name.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter=spec \"test/*.test.js\"",
+    "demo": "node examples/demo.js",
+    "serve:demo": "node examples/serve-demo.js",
+    "start:arbiter": "node arbiter/server.js",
+    "start:frontdoor": "node frontdoor/server.js",
+    "keys": "node scripts/make-keys.js"
+  },
+  "license": "UNLICENSED"
+}

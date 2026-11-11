@@ -1,0 +1,48 @@
+{
+  "slug": "example-broker",
+  "_note": "Fictional broker and fictional listing, for the demo and tests. Every figure here is invented.",
+  "business": {
+    "name": "Example Business Brokers (fictional)",
+    "kind": "business_broker",
+    "summary": "A made-up brokerage used to show how a front door works. It sells local service companies."
+  },
+  "availability": [
+    "2031-03-04T15:00:00-05:00",
+    "2031-03-04T16:30:00-05:00",
+    "2031-03-05T10:00:00-05:00"
+  ],
+  "offers": [
+    {
+      "id": "hvac-listing-001",
+      "title": "Residential heating and cooling service company, mid-Atlantic",
+      "public": {
+        "industry": "Residential HVAC service and replacement",
+        "region": "Mid-Atlantic, metro area of about 400,000 people",
+        "asking_price_usd": 3200000,
+        "revenue_usd": 4600000,
+        "sde_usd": 1050000,
+        "employees": 19,
+        "years_in_business": 24,
+        "reason_for_sale": "Owner is retiring and will stay for a handover period.",
+        "real_estate_included": false,
+        "financing": "Lender has pre-reviewed the business for an SBA 7(a) loan. Seller will consider a note.",
+        "owner_role": "Owner handles estimating and bank relationships. Two service managers run the day to day."
+      },
+      "gated": {
+        "business_name": "Fictional Comfort Heating and Air, Inc.",
+        "customer_concentration": "No customer is more than 2 percent of revenue. About 1,900 maintenance agreements.",
+        "financials_summary": "Three years of tax returns and monthly statements are in the data room. Ask the broker for access."
+      },
+      "private": {
+        "price_floor_usd": 2850000
+      },
+      "requirements": {
+        "identity_verified": true,
+        "funds_usd_at_least": 320000,
+        "nda": "standard-v1"
+      },
+      "blind_match": { "enabled": true },
+      "booking": { "requires_overlap": true }
+    }
+  ]
+}
