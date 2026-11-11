@@ -60,7 +60,7 @@ The **profile** is a signed statement from a verifier the owner trusts:
 
 ```json
 {
-  "v": 1, "iss": "vestibule-verify", "iat": 0, "exp": 0,
+  "v": 1, "iss": "dutch-door-verify", "iat": 0, "exp": 0,
   "principal": { "id": "buyer:acme", "name": "Acme Holdings", "kind": "company" },
   "verified": { "identity": true, "funds_usd_at_least": 500000 },
   "agent": { "id": "agent:acme-1", "may": ["sign_nda:standard-v1", "blind_match", "book_call"] }

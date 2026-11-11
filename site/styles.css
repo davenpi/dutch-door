@@ -191,3 +191,5 @@ h3{font-family:var(--body);font-weight:600;font-size:19px;line-height:1.3}
   .result[data-state="overlap"] .result-main,
   .result[data-state="none"] .result-main{font-size:29px}
 }
+
+.name-note{grid-column:1/-1;margin:0}

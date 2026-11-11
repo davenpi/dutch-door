@@ -44,6 +44,10 @@
       el.hidden = false;
     });
   }
+  var nameNote = (cfg.NAME_NOTE || "").trim();
+  if (nameNote) {
+    each("[data-name-note]", function (el) { el.textContent = nameNote; el.hidden = false; });
+  }
   if (postal) {
     each("[data-postal]", function (el) { el.textContent = postal; el.hidden = false; });
   }

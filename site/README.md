@@ -20,6 +20,7 @@ Edit `config.js`. It is the only file that holds them.
 | `BRAND` | The business name, shown in the header, footer, page title and email subject |
 | `DOMAIN` | The domain the site is served from |
 | `EMAIL` | The address every contact link opens |
+| `NAME_NOTE` | Optional. One line explaining the name. Empty hides it. Change it if you change `BRAND` |
 | `FOUNDER` | Optional. A name shown under "Where this stands". Empty hides it |
 | `CALENDAR_URL` | Optional. A scheduling link. Empty hides the "Book a 15-minute call" button |
 | `POSTAL_ADDRESS` | Optional. A postal address in the footer. Empty hides it |

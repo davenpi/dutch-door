@@ -250,10 +250,13 @@ export class FrontDoor {
   }
 
   /** Book an intro call in one of the owner's open slots. */
-  book({ session, slot }) {
+  async book({ session, slot }) {
     const visitor = this.#session(session);
     const offer = this.#offer(visitor.offerId);
     if (!visitor.agent.may?.includes('book_call')) throw new FrontDoorError(403, 'agent_may_not', 'This agent is not allowed to book calls for its principal.');
+    // The door learns the blind check outcome only by asking the arbiter. Ask
+    // now, so a visitor who already read the result there is not turned away.
+    if (offer.booking?.requires_overlap && visitor.blind && !visitor.blind.outcome) await this.blindMatchStatus({ session });
     if (offer.booking?.requires_overlap && visitor.blind?.outcome !== 'overlap') {
       throw new FrontDoorError(409, 'overlap_required', 'The owner takes calls on this offer only after a blind price check shows a deal is possible.');
     }

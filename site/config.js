@@ -4,13 +4,17 @@
 */
 window.SITE_CONFIG = {
   // The business name. Change it here and it changes everywhere.
-  BRAND: "Vestibule",
+  BRAND: "Dutch Door",
 
   // The domain the site is served from, without https://
   DOMAIN: "example.com",
 
   // The address brokers write to. Used for every contact link.
   EMAIL: "hello@example.com",
+
+  // Optional. One line explaining the name, shown under "What you control".
+  // Leave empty to hide it. Change or clear it if you change BRAND.
+  NAME_NOTE: "Why the name: a Dutch door opens at the top so you can talk to whoever knocks, while the bottom half stays shut.",
 
   // Optional. A founder's name shown in the "Where this stands" section.
   // Leave empty to show no name.

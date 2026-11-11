@@ -9,7 +9,7 @@
 //   ARBITER_CREATOR_KEY   this server's key at the arbiter
 //   TRUSTED_ISSUERS_FILE  JSON file: { "issuer id": "public key PEM" }
 //   OWNER_KEYS            slug=key pairs, comma-separated, for reading inboxes
-//   BRAND                 name shown on listing pages, default Vestibule
+//   BRAND                 name shown on listing pages, default Dutch Door
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,7 +33,7 @@ async function wrap(fn) {
  * @param {Record<string,string>} [o.ownerKeys]  slug -> key
  * @param {string} [o.brand]  Name shown on the pages people see.
  */
-export function createFrontDoorServer({ doors, ownerKeys = {}, brand = 'Vestibule' }) {
+export function createFrontDoorServer({ doors, ownerKeys = {}, brand = 'Dutch Door' }) {
   const bySlug = new Map(doors.map((d) => [d.slug, d]));
   const door = (slug) => {
     const d = bySlug.get(slug);
@@ -84,7 +84,7 @@ export function createFrontDoorServer({ doors, ownerKeys = {}, brand = 'Vestibul
     {
       method: 'POST',
       path: '/b/:slug/book',
-      handler: (c) => wrap(() => ({ body: door(c.params.slug).book({ session: session(c), slot: c.body.slot }) })),
+      handler: (c) => wrap(async () => ({ body: await door(c.params.slug).book({ session: session(c), slot: c.body.slot }) })),
     },
     {
       method: 'GET',
@@ -121,6 +121,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     (business) => new FrontDoor({ business, arbiter, arbiterUrl: env.ARBITER_PUBLIC_URL || env.ARBITER_URL, trustedIssuers }),
   );
   const ownerKeys = Object.fromEntries((env.OWNER_KEYS || '').split(',').map((s) => s.trim()).filter(Boolean).map((pair) => pair.split('=')));
-  const port = await listen(createFrontDoorServer({ doors, ownerKeys, brand: env.BRAND || 'Vestibule' }), Number(env.PORT || 8788), env.HOST || '127.0.0.1');
+  const port = await listen(createFrontDoorServer({ doors, ownerKeys, brand: env.BRAND || 'Dutch Door' }), Number(env.PORT || 8788), env.HOST || '127.0.0.1');
   console.log('Front door listening on port ' + port + ' for: ' + doors.map((d) => d.slug).join(', '));
 }

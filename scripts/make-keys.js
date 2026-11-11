@@ -16,7 +16,7 @@ if (fs.existsSync(envFile)) {
   process.exit(1);
 }
 fs.writeFileSync(path.join(dir, 'issuer-private.pem'), issuer.privateKey, { mode: 0o600 });
-fs.writeFileSync(path.join(dir, 'trusted-issuers.json'), JSON.stringify({ 'vestibule-verify': issuer.publicKey }, null, 2));
+fs.writeFileSync(path.join(dir, 'trusted-issuers.json'), JSON.stringify({ 'dutch-door-verify': issuer.publicKey }, null, 2));
 fs.writeFileSync(
   envFile,
   ['ARBITER_CREATOR_KEYS=' + key(), 'OWNER_KEYS=example-broker=' + key(), 'TRUSTED_ISSUERS_FILE=' + path.join(dir, 'trusted-issuers.json'), ''].join('\n'),

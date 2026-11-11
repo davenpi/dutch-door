@@ -128,21 +128,22 @@ test('an agent without the authority cannot run a blind match or book', async ()
   const ctx = setup();
   const q = qualified(ctx, { agent: { id: 'agent:limited', may: ['sign_nda:standard-v1'] } });
   await assert.rejects(() => ctx.door.startBlindMatch({ session: q.session }), code('agent_may_not'));
-  assert.throws(() => ctx.door.book({ session: q.session }), code('agent_may_not'));
+  await assert.rejects(() => ctx.door.book({ session: q.session }), code('agent_may_not'));
 });
 
 test('booking waits for an overlap when the owner requires one, then takes a slot once', async () => {
   const ctx = setup();
   const q = qualified(ctx);
-  assert.throws(() => ctx.door.book({ session: q.session }), code('overlap_required'));
+  await assert.rejects(() => ctx.door.book({ session: q.session }), code('overlap_required'));
   const opened = await ctx.door.startBlindMatch({ session: q.session });
+  await assert.rejects(() => ctx.door.book({ session: q.session }), code('overlap_required'));
   ctx.arbiter.submit({ sessionId: opened.arbiter.session_id, token: opened.arbiter.token, values: { price: 3000000 } });
-  await ctx.door.blindMatchStatus({ session: q.session });
-  const choices = ctx.door.book({ session: q.session });
+  // No explicit status call here: book asks the arbiter itself.
+  const choices = await ctx.door.book({ session: q.session });
   assert.equal(choices.status, 'choose_slot');
   assert.equal(choices.slots.length, 3);
-  assert.throws(() => ctx.door.book({ session: q.session, slot: '2031-01-01T00:00:00Z' }), code('slot_unavailable'));
-  const booked = ctx.door.book({ session: q.session, slot: choices.slots[0] });
+  await assert.rejects(() => ctx.door.book({ session: q.session, slot: '2031-01-01T00:00:00Z' }), code('slot_unavailable'));
+  const booked = await ctx.door.book({ session: q.session, slot: choices.slots[0] });
   assert.equal(booked.status, 'booked');
   assert.equal(ctx.door.inbox().leads[0].call, choices.slots[0]);
 });

@@ -40,7 +40,7 @@ export function show(key, value) {
  * @param {string} p.slug
  * @param {string} [p.brand]
  */
-export function listingPage({ manifest, offerId, slug, brand = 'Vestibule' }) {
+export function listingPage({ manifest, offerId, slug, brand = 'Dutch Door' }) {
   const offer = manifest.offers.find((o) => o.id === offerId);
   if (!offer) return null;
   const facts = Object.entries(offer.public).map(([k, v]) => `<tr><th scope="row">${esc(label(k))}</th><td>${esc(show(k, v))}</td></tr>`).join('');
