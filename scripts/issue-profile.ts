@@ -8,9 +8,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { issueProfile } from '../lib/profile.js';
+import { issueProfile } from '../lib/profile.ts';
 
-const args = {};
+const args: Record<string, string | undefined> = {};
 for (let i = 2; i < process.argv.length; i += 2) args[process.argv[i].replace(/^--/, '')] = process.argv[i + 1];
 
 const keyFile = args.key || path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.local', 'issuer-private.pem');

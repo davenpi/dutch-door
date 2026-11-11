@@ -1,20 +1,21 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Arbiter, ArbiterError, commitmentFor } from '../arbiter/core.js';
+import { Arbiter, ArbiterError, commitmentFor } from '../arbiter/core.ts';
+import type { PartyInput } from '../arbiter/core.ts';
 
-const parties = [
+const parties: PartyInput[] = [
   { id: 'buyer:nottoway', role: 'at_most' },
   { id: 'seller:listing-1', role: 'at_least' },
 ];
 
-function run(arbiter, most, least, dealRef = 'deal-1') {
+function run(arbiter: Arbiter, most: number, least: number, dealRef = 'deal-1') {
   const s = arbiter.createSession({ dealRef, parties });
   arbiter.submit({ sessionId: s.sessionId, token: s.tokens['buyer:nottoway'], values: { price: most } });
   arbiter.submit({ sessionId: s.sessionId, token: s.tokens['seller:listing-1'], values: { price: least } });
   return { s, result: arbiter.result({ sessionId: s.sessionId, token: s.tokens['buyer:nottoway'] }) };
 }
 
-const code = (c) => (err) => err instanceof ArbiterError && err.code === c;
+const code = (c: string) => (err: unknown): boolean => err instanceof ArbiterError && err.code === c;
 
 test('overlap when the buyer ceiling is above the seller floor', () => {
   assert.equal(run(new Arbiter(), 2_400_000, 2_100_000).result.outcome, 'overlap');

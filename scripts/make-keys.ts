@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { generateIssuerKeys } from '../lib/profile.js';
+import { generateIssuerKeys } from '../lib/profile.ts';
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.local');
 fs.mkdirSync(dir, { recursive: true });
-const key = () => randomBytes(24).toString('hex');
+const key = (): string => randomBytes(24).toString('hex');
 const issuer = generateIssuerKeys();
 const envFile = path.join(dir, 'env');
 if (fs.existsSync(envFile)) {

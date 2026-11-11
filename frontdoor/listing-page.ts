@@ -2,9 +2,12 @@
 // answers plain-word questions from them, and takes a request for access.
 // Checking a person's NDA and proof of funds is done by hand during the pilot.
 
-const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+import type { Manifest } from './core.ts';
 
-const LABELS = {
+const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = (v: unknown): string => String(v).replace(/[&<>"']/g, (c) => ESCAPES[c]);
+
+const LABELS: Record<string, string> = {
   industry: 'Industry',
   region: 'Where',
   asking_price_usd: 'Asking price',
@@ -24,23 +27,25 @@ const LABELS = {
   nda: 'Signed NDA',
 };
 
-export const label = (key) => LABELS[key] || key.replace(/_usd$/, '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+export const label = (key: string): string => LABELS[key] || key.replace(/_usd$/, '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
-export function show(key, value) {
+export function show(key: string, value: unknown): string {
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'number' && key.includes('_usd')) return '$' + value.toLocaleString('en-US');
   if (typeof value === 'number') return value.toLocaleString('en-US');
   return String(value);
 }
 
-/**
- * @param {object} p
- * @param {object} p.manifest  The door's manifest.
- * @param {string} p.offerId
- * @param {string} p.slug
- * @param {string} [p.brand]
- */
-export function listingPage({ manifest, offerId, slug, brand = 'Dutch Door' }) {
+export interface ListingPageInput {
+  /** The door's manifest. */
+  manifest: Manifest;
+  offerId: string;
+  slug: string;
+  brand?: string;
+}
+
+/** The page for one offer, or null if the door has no such offer. */
+export function listingPage({ manifest, offerId, slug, brand = 'Dutch Door' }: ListingPageInput): string | null {
   const offer = manifest.offers.find((o) => o.id === offerId);
   if (!offer) return null;
   const facts = Object.entries(offer.public).map(([k, v]) => `<tr><th scope="row">${esc(label(k))}</th><td>${esc(show(k, v))}</td></tr>`).join('');

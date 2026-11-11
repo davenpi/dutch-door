@@ -40,7 +40,9 @@ web page for a person.
 ```
 
 `fields` asks by name. `question` asks in plain words and is mapped to fields by
-keyword. Each answer is `answered`, `gated` (with what is required) or
+keyword. A question about the seller's limit ("what is the lowest they would
+take?") gets `not_available` for that alone, on every offer, whether or not a
+limit exists, and never the asking price. Each answer is `answered`, `gated` (with what is required) or
 `not_available`. A question the door cannot map is logged for the owner and the
 response carries `"escalated"`. `for_owner: true` sends the question to the
 owner even when part of it was answered.

@@ -5,11 +5,12 @@
   "description": "MCP endpoint for a front door. Lets an MCP-capable agent ask, qualify, run a blind price check and book.",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.18.0"
   },
   "scripts": {
-    "start": "node http.js",
-    "test": "node --test --test-reporter=spec \"test/*.test.js\""
+    "start": "node http.ts",
+    "test": "node --test --test-reporter=spec \"test/*.test.ts\"",
+    "typecheck": "tsc -p ."
   },
   "license": "UNLICENSED",
   "dependencies": {

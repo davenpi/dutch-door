@@ -5,17 +5,22 @@
   "description": "A front door for AI agents, plus a neutral blind-match arbiter. Working name.",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.18.0"
   },
   "scripts": {
-    "test": "node --test --test-reporter=spec \"test/*.test.js\"",
+    "test": "node --test --test-reporter=spec \"test/*.test.ts\"",
     "test:all": "npm test && npm --prefix mcp test",
-    "demo": "node examples/demo.js",
-    "serve:demo": "node examples/serve-demo.js",
-    "start:arbiter": "node arbiter/server.js",
-    "start:frontdoor": "node frontdoor/server.js",
-    "keys": "node scripts/make-keys.js",
-    "issue": "node scripts/issue-profile.js"
+    "typecheck": "tsc -p .",
+    "demo": "node examples/demo.ts",
+    "serve:demo": "node examples/serve-demo.ts",
+    "start:arbiter": "node arbiter/server.ts",
+    "start:frontdoor": "node frontdoor/server.ts",
+    "keys": "node scripts/make-keys.ts",
+    "issue": "node scripts/issue-profile.ts"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2"
+  }
 }

@@ -3,9 +3,9 @@
 One address per business where outside agents and people can ask questions, get
 qualified against the owner's rules, run a blind price check and book a call.
 
-- `core.js`: the logic for one business.
-- `server.js`: HTTP for many businesses on one server, under `/b/{slug}`.
-- `listing-page.js`: the page a person sees at `/b/{slug}/o/{offer_id}`.
+- `core.ts`: the logic for one business.
+- `server.ts`: HTTP for many businesses on one server, under `/b/{slug}`.
+- `listing-page.ts`: the page a person sees at `/b/{slug}/o/{offer_id}`.
 - `businesses/*.json`: one config file per business. `example-broker.json` is fictional.
 
 ## Try it on your machine
@@ -48,7 +48,7 @@ this repo. Keep real configs outside git and point `BUSINESS_DIR` at them.
 ## How questions are answered
 
 By rule, not by a language model. A question in plain words is mapped to fact
-names by keyword (`fieldsForQuestion` in `core.js`), and the release decision
+names by keyword (`fieldsForQuestion` in `core.ts`), and the release decision
 is a lookup: public, gated or private. That makes the door predictable and
 impossible to talk into releasing something. The cost is that it misreads some
 questions, so a visitor can always send a question to the owner (`for_owner`).

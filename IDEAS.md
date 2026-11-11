@@ -19,7 +19,7 @@ time.
 |---|---|---|---|
 | 1 | One-sided agent | An agent sold to buyers or to sellers. It talks to whoever answers, person or agent. | Partly built: Nottoway is the first buyer-side user. Not the product. |
 | 2 | Agent front door | An address every business has, where outside agents ask, get qualified, book time and negotiate inside the owner's rules. | **Building.** `frontdoor/` |
-| 3 | Portable verified profile | One credential: who you are, what you can afford, what your agent may commit to. Reused everywhere. | **Building, minimal.** `lib/profile.js`. Verification itself is by hand. |
+| 3 | Portable verified profile | One credential: who you are, what you can afford, what your agent may commit to. Reused everywhere. | **Building, minimal.** `lib/profile.ts`. Verification itself is by hand. |
 | 4 | Blind-match arbiter | A neutral agent sees both private limits and reports only whether a deal is possible. | **Building.** `arbiter/` |
 | 5 | Clearinghouse | A venue with rules, logs and standard terms where agents transact directly. Charges per match or per close. | Parked. It is what a network of front doors grows into. |
 | 6 | Record and dispute layer | A trusted log of what each agent agreed to and on whose authority. | Seeded: the arbiter's commitments and the door's NDA record. Not a product yet. |

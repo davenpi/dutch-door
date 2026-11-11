@@ -1,18 +1,35 @@
 import fs from 'node:fs';
-import { Arbiter } from '../arbiter/core.js';
-import { FrontDoor } from '../frontdoor/core.js';
-import { generateIssuerKeys, issueProfile } from '../lib/profile.js';
+import { Arbiter } from '../arbiter/core.ts';
+import type { ArbiterOptions } from '../arbiter/core.ts';
+import { FrontDoor } from '../frontdoor/core.ts';
+import type { BusinessConfig } from '../frontdoor/core.ts';
+import { generateIssuerKeys, issueProfile } from '../lib/profile.ts';
+import type { IssueProfileInput, IssuerKeys } from '../lib/profile.ts';
 
-export const business = () => JSON.parse(fs.readFileSync(new URL('../frontdoor/businesses/example-broker.json', import.meta.url), 'utf8'));
+export const business = (): BusinessConfig => JSON.parse(fs.readFileSync(new URL('../frontdoor/businesses/example-broker.json', import.meta.url), 'utf8')) as BusinessConfig;
 export const OFFER = 'hvac-listing-001';
 export const FLOOR = 2850000;
 export const BEFORE_SLOTS = Date.parse('2031-03-01T12:00:00-05:00');
 
-export function setup({ now = () => BEFORE_SLOTS, arbiterOptions = {} } = {}) {
+export interface SetupOptions {
+  now?: () => number;
+  arbiterOptions?: ArbiterOptions;
+}
+
+/** A door, its arbiter, and a way to issue profiles the door trusts. */
+export interface TestContext {
+  keys: IssuerKeys;
+  arbiter: Arbiter;
+  door: FrontDoor;
+  /** A good profile for a fictional buyer. Pass fields to replace. */
+  profile: (over?: Partial<IssueProfileInput>) => string;
+}
+
+export function setup({ now = () => BEFORE_SLOTS, arbiterOptions = {} }: SetupOptions = {}): TestContext {
   const keys = generateIssuerKeys();
   const arbiter = new Arbiter({ now, ...arbiterOptions });
   const door = new FrontDoor({ business: business(), arbiter, arbiterUrl: 'http://arbiter.test', trustedIssuers: { 'test-issuer': keys.publicKey }, now });
-  const profile = (over = {}) =>
+  const profile = (over: Partial<IssueProfileInput> = {}): string =>
     issueProfile({
       issuer: 'test-issuer',
       privateKey: keys.privateKey,

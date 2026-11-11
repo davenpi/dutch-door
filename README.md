@@ -18,7 +18,7 @@ gets out until the owner's conditions are met.
 | `site/` | The landing page. TypeScript, builds to static files, one config file |
 | `frontdoor/` | The door: ask, qualify, blind match, book, owner's inbox |
 | `arbiter/` | Two sealed numbers in, one yes or no out |
-| `lib/profile.js` | Signed, portable buyer profile |
+| `lib/profile.ts` | Signed, portable buyer profile |
 | `mcp/` | The door as an MCP server, so any MCP agent can use it |
 | `protocol/SPEC.md` | The protocol, version 0.1 |
 | `examples/` | The demo |
@@ -28,12 +28,13 @@ gets out until the owner's conditions are met.
 
 ## See it work
 
-Needs Node 20 or newer. The core has no dependencies, so there is nothing to
-install.
+Needs Node 22.18 or newer, which runs TypeScript files directly. The core has
+no runtime dependencies, so there is nothing to install to run it.
 
 ```
 npm run demo         # three fictional buyers arrive at one broker's door
-npm test             # 31 tests
+npm test             # 38 tests
+npm run typecheck    # after: npm install (dev tools only)
 npm run serve:demo   # runs it locally and prints links to click
 ```
 

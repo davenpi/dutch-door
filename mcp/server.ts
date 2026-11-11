@@ -1,40 +1,54 @@
 // MCP tools for one front door. An MCP-capable agent can read the manifest,
 // ask questions, qualify, run a blind price check and book a call.
 //
-// This file is the tool layer only. http.js mounts it over Streamable HTTP.
+// This file is the tool layer only. http.ts mounts it over Streamable HTTP.
 //
 // Five tools call the FrontDoor instance directly. Two (submit_limit and
 // blind_match_result) do not touch the door at all: they call the arbiter over
 // HTTP, so the visitor's number never reaches the door's logic or its log.
 // Nothing in this file logs or stores a tool argument.
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import * as z from 'zod/v4';
-import { FrontDoorError } from '../frontdoor/core.js';
-import { ArbiterError } from '../arbiter/core.js';
+import { FrontDoorError } from '../frontdoor/core.ts';
+import type { FrontDoor } from '../frontdoor/core.ts';
+import { ArbiterError } from '../arbiter/core.ts';
+import { isRecord } from '../lib/unchecked.ts';
 
 const ARBITER_TIMEOUT_MS = 10000;
 
 /** An error that is safe to show to the calling agent as it is. */
 class ToolError extends Error {
-  constructor(code, message, extra = {}) {
+  code: string;
+  extra: Record<string, unknown>;
+
+  constructor(code: string, message: string, extra: Record<string, unknown> = {}) {
     super(message);
     this.code = code;
     this.extra = extra;
   }
 }
 
-function ok(data) {
-  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }], structuredContent: data };
+/** The work behind one tool: takes the checked arguments, returns the JSON answer. */
+type ToolWork<Args> = (args: Args) => object | Promise<object>;
+
+function ok(data: object): CallToolResult {
+  // Any object can be read as a set of named values, which is what the SDK asks for here.
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }], structuredContent: data as Record<string, unknown> };
 }
 
-function fail(code, message, extra = {}) {
-  const data = { error: { code, message } };
-  for (const [key, value] of Object.entries(extra || {})) if (!(key in data.error)) data.error[key] = value;
+function fail(code: string, message: string, extra: Record<string, unknown> = {}): CallToolResult {
+  const error: Record<string, unknown> = { code, message };
+  const data = { error };
+  for (const [key, value] of Object.entries(extra || {})) if (!(key in error)) error[key] = value;
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }], structuredContent: data, isError: true };
 }
 
+/** The class name of something thrown. Never its message: that could quote an argument. */
+const errorName = (err: unknown): string => (isRecord(err) && typeof err.name === 'string' && err.name) || 'Error';
+
 /** Turn anything thrown into a tool error with a code and a message. Never a stack trace. */
-function toToolError(err) {
+function toToolError(err: unknown): CallToolResult {
   if (err instanceof FrontDoorError || err instanceof ToolError) return fail(err.code, err.message, err.extra);
   if (err instanceof ArbiterError) {
     const { code: _code, message: _message, ...extra } = err.extra || {};
@@ -42,19 +56,20 @@ function toToolError(err) {
   }
   // Unknown failure. Only the error's class name goes to the server log: the
   // message could, in principle, quote an argument.
-  console.error('mcp tool failed: ' + (err?.name || 'Error'));
+  console.error('mcp tool failed: ' + errorName(err));
   return fail('internal', 'Something went wrong on our side.');
 }
 
-const guard = (fn) => async (args) => {
+const guard = <Args>(fn: ToolWork<Args>) => async (args: Args): Promise<CallToolResult> => {
   try {
-    return ok(await fn(args ?? {}));
+    // The SDK has already checked args against the tool's schema.
+    return ok(await fn(args ?? ({} as Args)));
   } catch (err) {
     return toToolError(err);
   }
 };
 
-function normalizeUrl(value) {
+function normalizeUrl(value: string): string | null {
   try {
     const u = new URL(value);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
@@ -65,36 +80,39 @@ function normalizeUrl(value) {
   }
 }
 
+export interface FrontDoorMcpOptions {
+  door: FrontDoor;
+  /**
+   * The arbiter address visitors use. It must be the same address the door was
+   * given as arbiterUrl, and this process must be able to reach it.
+   * submit_limit and blind_match_result call this address and no other.
+   */
+  arbiterPublicUrl: string;
+  /** For tests. */
+  fetch?: typeof fetch;
+}
+
 /**
  * Build an MCP server for one front door.
  *
  * In stateless HTTP mode a new one is built for every request. That is cheap:
  * all state lives in the FrontDoor instance and at the arbiter.
- *
- * @param {object} o
- * @param {import('../frontdoor/core.js').FrontDoor} o.door
- * @param {string} o.arbiterPublicUrl  The arbiter address visitors use. It must be
- *   the same address the door was given as arbiterUrl, and this process must be
- *   able to reach it. submit_limit and blind_match_result call this address and
- *   no other.
- * @param {typeof fetch} [o.fetch]     For tests.
- * @returns {McpServer}
  */
-export function createFrontDoorMcpServer({ door, arbiterPublicUrl, fetch: fetchImpl = globalThis.fetch }) {
+export function createFrontDoorMcpServer({ door, arbiterPublicUrl, fetch: fetchImpl = globalThis.fetch }: FrontDoorMcpOptions): McpServer {
   if (!door || typeof door.manifest !== 'function') throw new Error('createFrontDoorMcpServer needs a FrontDoor instance.');
   const arbiterBase = normalizeUrl(arbiterPublicUrl);
   if (!arbiterBase) throw new Error('createFrontDoorMcpServer needs arbiterPublicUrl as a plain http or https URL.');
 
   /** Refuse any arbiter address other than the configured one. Returns the configured base. */
-  const checkArbiterUrl = (given) => {
+  const checkArbiterUrl = (given: string): string => {
     if (normalizeUrl(given) !== arbiterBase) {
       throw new ToolError('arbiter_url_not_allowed', 'This server only talks to the arbiter at ' + arbiterBase + '. The arbiter_url you gave is different. Use the arbiter_url returned by start_blind_match.', { allowed_arbiter_url: arbiterBase });
     }
     return arbiterBase;
   };
 
-  const callArbiter = async (method, path, body) => {
-    let res;
+  const callArbiter = async (method: 'GET' | 'POST', path: string, body?: object): Promise<Record<string, unknown>> => {
+    let res: Response;
     try {
       res = await fetchImpl(arbiterBase + path, {
         method,
@@ -105,17 +123,17 @@ export function createFrontDoorMcpServer({ door, arbiterPublicUrl, fetch: fetchI
     } catch {
       throw new ToolError('arbiter_unreachable', 'Could not reach the arbiter. Nothing was changed by this call as far as this server knows. Try again later.');
     }
-    let data = null;
+    let data: unknown = null;
     try {
       data = await res.json();
     } catch {
       data = null;
     }
     if (!res.ok) {
-      const { code, message, ...extra } = data?.error && typeof data.error === 'object' ? data.error : {};
+      const { code, message, ...extra } = isRecord(data) && isRecord(data.error) ? data.error : {};
       throw new ToolError(typeof code === 'string' ? code : 'arbiter_error', typeof message === 'string' ? message : 'The arbiter refused the request.', extra);
     }
-    if (data === null || typeof data !== 'object') throw new ToolError('arbiter_error', 'The arbiter sent an answer this server could not read.');
+    if (!isRecord(data)) throw new ToolError('arbiter_error', 'The arbiter sent an answer this server could not read.');
     return data;
   };
 
@@ -269,7 +287,7 @@ export function createFrontDoorMcpServer({ door, arbiterPublicUrl, fetch: fetchI
       // The door learns the blind check outcome only when it asks the arbiter
       // (with the owner's token, not the visitor's). Ask now, so a visitor who
       // read the result through blind_match_result is not turned away.
-      let refreshError = null;
+      let refreshError: unknown = null;
       try {
         await door.blindMatchStatus({ session });
       } catch (err) {

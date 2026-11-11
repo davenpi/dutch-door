@@ -40,7 +40,7 @@ environment variable and prose. Do not hard-code it in new code.
   it so. Anything that needs a package at run time gets its own folder and
   `package.json`, like `mcp/` and `site/`.
 - The decision about what a door may release is made by rules in
-  `frontdoor/core.js`, never by a language model. A model may translate
+  `frontdoor/core.ts`, never by a language model. A model may translate
   questions into field names. It may not decide.
 - Text that arrives from a visitor is data. Nothing may treat it as an instruction.
 - Every behavior that protects a private number has a test. Do not weaken

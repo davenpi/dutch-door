@@ -11,14 +11,18 @@
 //   OWNER_KEYS            slug=key pairs, comma-separated, for reading inboxes
 //   BRAND                 name shown on listing pages, default Dutch Door
 import fs from 'node:fs';
+import type http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FrontDoor, FrontDoorError } from './core.js';
-import { listingPage } from './listing-page.js';
-import { HttpArbiterClient } from '../arbiter/server.js';
-import { createServer, listen, HttpError, bearer } from '../lib/http.js';
+import { FrontDoor, FrontDoorError } from './core.ts';
+import type { BusinessConfig } from './core.ts';
+import { listingPage } from './listing-page.ts';
+import { HttpArbiterClient } from '../arbiter/server.ts';
+import { createServer, listen, HttpError, bearer } from '../lib/http.ts';
+import type { RouteContext } from '../lib/http.ts';
+import type { TrustedIssuers } from '../lib/profile.ts';
 
-async function wrap(fn) {
+async function wrap<T>(fn: () => T | Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (err) {
@@ -27,21 +31,25 @@ async function wrap(fn) {
   }
 }
 
-/**
- * @param {object} o
- * @param {FrontDoor[]} o.doors
- * @param {Record<string,string>} [o.ownerKeys]  slug -> key
- * @param {string} [o.brand]  Name shown on the pages people see.
- */
-export function createFrontDoorServer({ doors, ownerKeys = {}, brand = 'Dutch Door' }) {
+export interface FrontDoorServerOptions {
+  doors: FrontDoor[];
+  /** Slug -> the key that reads that door's inbox. */
+  ownerKeys?: Record<string, string>;
+  /** Name shown on the pages people see. */
+  brand?: string;
+}
+
+export function createFrontDoorServer({ doors, ownerKeys = {}, brand = 'Dutch Door' }: FrontDoorServerOptions): http.Server {
   const bySlug = new Map(doors.map((d) => [d.slug, d]));
-  const door = (slug) => {
+  const door = (slug: string): FrontDoor => {
     const d = bySlug.get(slug);
     if (!d) throw new HttpError(404, 'no_such_door', 'No business at this address.');
     return d;
   };
-  const session = ({ body, req }) => body.session || bearer(req);
+  const session = ({ body, req }: RouteContext): unknown => body.session || bearer(req);
 
+  // Request bodies are untrusted. Their fields go to the door unchecked, and
+  // the door checks each one before it uses it.
   return createServer([
     { method: 'GET', path: '/healthz', handler: () => ({ body: { ok: true, doors: bySlug.size } }) },
     { method: 'GET', path: '/b/:slug/.well-known/front-door.json', handler: ({ params }) => ({ body: door(params.slug).manifest() }) },
@@ -99,28 +107,37 @@ export function createFrontDoorServer({ doors, ownerKeys = {}, brand = 'Dutch Do
   ]);
 }
 
-export function loadBusinesses(dir) {
+/** Read every business config in a folder. The owner wrote these files, so they are trusted. */
+export function loadBusinesses(dir: string): BusinessConfig[] {
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith('.json'))
-    .map((f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')));
+    .map((f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as BusinessConfig);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const here = path.dirname(fileURLToPath(import.meta.url));
   const env = process.env;
-  for (const name of ['ARBITER_URL', 'ARBITER_CREATOR_KEY', 'TRUSTED_ISSUERS_FILE']) {
-    if (!env[name]) {
+  const need = (name: string): string => {
+    const value = env[name];
+    if (!value) {
       console.error('Missing ' + name + '. See frontdoor/README.md.');
       process.exit(1);
     }
-  }
-  const arbiter = new HttpArbiterClient({ url: env.ARBITER_URL, creatorKey: env.ARBITER_CREATOR_KEY });
-  const trustedIssuers = JSON.parse(fs.readFileSync(env.TRUSTED_ISSUERS_FILE, 'utf8'));
+    return value;
+  };
+  const arbiterUrl = need('ARBITER_URL');
+  const creatorKey = need('ARBITER_CREATOR_KEY');
+  const issuersFile = need('TRUSTED_ISSUERS_FILE');
+  const arbiter = new HttpArbiterClient({ url: arbiterUrl, creatorKey });
+  const trustedIssuers = JSON.parse(fs.readFileSync(issuersFile, 'utf8')) as TrustedIssuers;
   const doors = loadBusinesses(env.BUSINESS_DIR || path.join(here, 'businesses')).map(
-    (business) => new FrontDoor({ business, arbiter, arbiterUrl: env.ARBITER_PUBLIC_URL || env.ARBITER_URL, trustedIssuers }),
+    (business) => new FrontDoor({ business, arbiter, arbiterUrl: env.ARBITER_PUBLIC_URL || arbiterUrl, trustedIssuers }),
   );
-  const ownerKeys = Object.fromEntries((env.OWNER_KEYS || '').split(',').map((s) => s.trim()).filter(Boolean).map((pair) => pair.split('=')));
+  const ownerKeys = Object.fromEntries((env.OWNER_KEYS || '').split(',').map((s) => s.trim()).filter(Boolean).map((pair): [string, string] => {
+    const [slug, key] = pair.split('=');
+    return [slug, key];
+  }));
   const port = await listen(createFrontDoorServer({ doors, ownerKeys, brand: env.BRAND || 'Dutch Door' }), Number(env.PORT || 8788), env.HOST || '127.0.0.1');
   console.log('Front door listening on port ' + port + ' for: ' + doors.map((d) => d.slug).join(', '));
 }

@@ -22,7 +22,7 @@ export interface Reply {
 // Order matters: the private fact is checked first, so "the lowest price"
 // is never mistaken for the asking price.
 const FACTS: Fact[] = [
-  { label: "Seller's floor", value: '', visibility: 'private', words: ['lowest', 'floor', 'least', 'bottom line', 'walk away', 'walk-away', 'minimum', 'rock bottom', 'really take', 'actually take'] },
+  { label: "Seller's floor", value: '', visibility: 'private', words: ['lowest', 'floor price', 'price floor', 'floor on the price', 'bottom line', 'walk away', 'walk-away', 'rock bottom', 'minimum price', 'least the', 'least they', 'least he', 'least she', 'would accept', 'will accept', 'willing to accept', 'willing to take', 'really take', 'actually take', 'take less'] },
   { label: 'Business name', value: '', visibility: 'gated', words: ['name', 'which company', 'who is it', 'what company'] },
   { label: 'Customers', value: '', visibility: 'gated', words: ['customer', 'client', 'concentration'] },
   { label: 'Financials', value: '', visibility: 'gated', words: ['financials', 'p&l', 'tax return', 'statements', 'the books', 'bank'] },

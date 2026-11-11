@@ -3,8 +3,8 @@
 Two sides each hand over a private limit. Both learn one thing: whether a deal
 is possible. Neither learns the other's number.
 
-- `core.js`: the logic, with no I/O.
-- `server.js`: the HTTP wrapper and the client a front door uses.
+- `core.ts`: the logic, with no I/O.
+- `server.ts`: the HTTP wrapper and the client a front door uses.
 
 ## Run it
 

@@ -4,16 +4,17 @@
 // own machine, with throwaway keys, so you can click through the listing page
 // and call the API by hand. Not for production: keys are printed, nothing is saved.
 import fs from 'node:fs';
-import { Arbiter } from '../arbiter/core.js';
-import { createArbiterServer, HttpArbiterClient } from '../arbiter/server.js';
-import { FrontDoor } from '../frontdoor/core.js';
-import { createFrontDoorServer } from '../frontdoor/server.js';
-import { generateIssuerKeys, issueProfile } from '../lib/profile.js';
-import { listen } from '../lib/http.js';
+import { Arbiter } from '../arbiter/core.ts';
+import { createArbiterServer, HttpArbiterClient } from '../arbiter/server.ts';
+import { FrontDoor } from '../frontdoor/core.ts';
+import type { BusinessConfig } from '../frontdoor/core.ts';
+import { createFrontDoorServer } from '../frontdoor/server.ts';
+import { generateIssuerKeys, issueProfile } from '../lib/profile.ts';
+import { listen } from '../lib/http.ts';
 
 // The example listing's call slots are in 2031; pretend it is just before them.
 const now = () => Date.parse('2031-03-01T12:00:00-05:00');
-const business = JSON.parse(fs.readFileSync(new URL('../frontdoor/businesses/example-broker.json', import.meta.url), 'utf8'));
+const business = JSON.parse(fs.readFileSync(new URL('../frontdoor/businesses/example-broker.json', import.meta.url), 'utf8')) as BusinessConfig;
 const issuer = generateIssuerKeys();
 
 const arbiterPort = await listen(createArbiterServer({ arbiter: new Arbiter({ now }), creatorKeys: ['local-door-key'] }), Number(process.env.ARBITER_PORT || 8787));

@@ -5,9 +5,9 @@
 // MCP session id is issued. The state that matters (door sessions, bookings,
 // blind checks) lives in the FrontDoor instances and at the arbiter.
 //
-// Run with: node mcp/http.js   (or "npm start" inside mcp/)
+// Run with: node mcp/http.ts   (or "npm start" inside mcp/)
 //
-// Environment, same as frontdoor/server.js plus MCP_PORT:
+// Environment, same as frontdoor/server.ts plus MCP_PORT:
 //   MCP_PORT              default 8789
 //   HOST                  default 127.0.0.1 (set 0.0.0.0 in a container)
 //   BUSINESS_DIR          folder of business configs, default frontdoor/businesses
@@ -21,43 +21,45 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { FrontDoor } from '../frontdoor/core.js';
-import { loadBusinesses } from '../frontdoor/server.js';
-import { HttpArbiterClient } from '../arbiter/server.js';
-import { listen } from '../lib/http.js';
-import { createFrontDoorMcpServer } from './server.js';
+import { FrontDoor } from '../frontdoor/core.ts';
+import { loadBusinesses } from '../frontdoor/server.ts';
+import { HttpArbiterClient } from '../arbiter/server.ts';
+import { listen } from '../lib/http.ts';
+import type { TrustedIssuers } from '../lib/profile.ts';
+import { isRecord } from '../lib/unchecked.ts';
+import { createFrontDoorMcpServer } from './server.ts';
 
 const MCP_PATH = /^\/b\/([^/]+)\/mcp\/?$/;
 const MAX_BODY_BYTES = 64 * 1024;
 
-function sendJson(res, status, body, headers = {}) {
+function sendJson(res: http.ServerResponse, status: number, body: unknown, headers: http.OutgoingHttpHeaders = {}): void {
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers });
   res.end(JSON.stringify(body));
 }
 
-const rpcError = (code, message) => ({ jsonrpc: '2.0', error: { code, message }, id: null });
+const rpcError = (code: number, message: string) => ({ jsonrpc: '2.0', error: { code, message }, id: null });
+
+export interface McpHttpOptions {
+  doors: FrontDoor[];
+  /** The arbiter address visitors use. Must be the arbiterUrl the doors were built with. */
+  arbiterPublicUrl: string;
+}
 
 /**
  * A node:http request listener that serves MCP for many doors. Use this to
  * mount MCP inside another node:http server in the same process, so that it
  * shares FrontDoor instances (and so sessions and the owner's log) with it.
- *
- * @param {object} o
- * @param {import('../frontdoor/core.js').FrontDoor[]} o.doors
- * @param {string} o.arbiterPublicUrl  The arbiter address visitors use. Must be the
- *   arbiterUrl the doors were built with.
- * @returns {(req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>}
  */
-export function createMcpRequestListener({ doors, arbiterPublicUrl }) {
+export function createMcpRequestListener({ doors, arbiterPublicUrl }: McpHttpOptions): (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> {
   const bySlug = new Map(doors.map((d) => [d.slug, d]));
   // Build one server per door now, so a bad arbiterPublicUrl fails at startup
   // and not on the first request.
   for (const door of bySlug.values()) createFrontDoorMcpServer({ door, arbiterPublicUrl });
 
   return async (req, res) => {
-    let pathname;
+    let pathname: string;
     try {
-      pathname = new URL(req.url, 'http://localhost').pathname;
+      pathname = new URL(req.url ?? '/', 'http://localhost').pathname;
     } catch {
       return sendJson(res, 400, { error: { code: 'bad_request', message: 'Bad request URL.' } });
     }
@@ -65,7 +67,7 @@ export function createMcpRequestListener({ doors, arbiterPublicUrl }) {
 
     const match = MCP_PATH.exec(pathname);
     if (!match) return sendJson(res, 404, { error: { code: 'not_found', message: 'No such path. MCP endpoints are at /b/{slug}/mcp.' } });
-    let slug = null;
+    let slug: string | null = null;
     try {
       slug = decodeURIComponent(match[1]);
     } catch {
@@ -89,35 +91,35 @@ export function createMcpRequestListener({ doors, arbiterPublicUrl }) {
       await transport.handleRequest(req, res);
     } catch (err) {
       // Class name only. The request body may hold a private number.
-      console.error('mcp request failed: ' + (err?.name || 'Error'));
+      console.error('mcp request failed: ' + ((isRecord(err) && typeof err.name === 'string' && err.name) || 'Error'));
       if (!res.headersSent) sendJson(res, 500, rpcError(-32603, 'Internal server error.'));
       else res.end();
     }
   };
 }
 
-/**
- * @param {object} o
- * @param {import('../frontdoor/core.js').FrontDoor[]} o.doors
- * @param {string} o.arbiterPublicUrl
- * @returns {http.Server}  Not yet listening.
- */
-export function createMcpHttpServer({ doors, arbiterPublicUrl }) {
+/** A server for the listener above. Not yet listening. */
+export function createMcpHttpServer({ doors, arbiterPublicUrl }: McpHttpOptions): http.Server {
   return http.createServer(createMcpRequestListener({ doors, arbiterPublicUrl }));
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const here = path.dirname(fileURLToPath(import.meta.url));
   const env = process.env;
-  for (const name of ['ARBITER_URL', 'ARBITER_CREATOR_KEY', 'TRUSTED_ISSUERS_FILE']) {
-    if (!env[name]) {
+  const need = (name: string): string => {
+    const value = env[name];
+    if (!value) {
       console.error('Missing ' + name + '. See mcp/README.md.');
       process.exit(1);
     }
-  }
-  const arbiterPublicUrl = env.ARBITER_PUBLIC_URL || env.ARBITER_URL;
-  const arbiter = new HttpArbiterClient({ url: env.ARBITER_URL, creatorKey: env.ARBITER_CREATOR_KEY });
-  const trustedIssuers = JSON.parse(fs.readFileSync(env.TRUSTED_ISSUERS_FILE, 'utf8'));
+    return value;
+  };
+  const arbiterUrl = need('ARBITER_URL');
+  const creatorKey = need('ARBITER_CREATOR_KEY');
+  const issuersFile = need('TRUSTED_ISSUERS_FILE');
+  const arbiterPublicUrl = env.ARBITER_PUBLIC_URL || arbiterUrl;
+  const arbiter = new HttpArbiterClient({ url: arbiterUrl, creatorKey });
+  const trustedIssuers = JSON.parse(fs.readFileSync(issuersFile, 'utf8')) as TrustedIssuers;
   const doors = loadBusinesses(env.BUSINESS_DIR || path.join(here, '..', 'frontdoor', 'businesses')).map(
     (business) => new FrontDoor({ business, arbiter, arbiterUrl: arbiterPublicUrl, trustedIssuers }),
   );
