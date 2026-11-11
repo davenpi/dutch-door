@@ -4,6 +4,24 @@ Newest first. Each entry says what was decided, why, and what would change it.
 Entries marked **Ian to confirm** were made by Claude overnight so the work
 could proceed; they are easy to reverse.
 
+## 2026-11-11
+
+**The landing page was rebuilt, and the whole repo moved to TypeScript.** (ID)
+Ian's reaction to the first page was that it looked like a wall of text, and
+he was right: about 750 words and no picture of the product. He asked for
+TypeScript throughout and for something that looks like it belongs to the
+next era, not a template. The new page is about 170 words. Its hero is the
+product's idea drawn live: a flow that meets a door open at the top and shut
+at the bottom. The two demos run real logic in the browser. The design is one
+bright field, graphite ink and a single blue, with a variable-width display
+face doing the work that illustrations would otherwise do.
+
+**The page now leads with the idea, not with brokers.** Ian to confirm.
+The headline and hero speak to any business. Brokers are named once, at the
+end. That fits the ambition and costs some directness for the broker reading
+it tomorrow. If the first replies show brokers do not see themselves in it,
+add a broker-specific line under the headline.
+
 ## 2026-11-10
 
 **Start with business brokers, not "every business".** (Claude for ID)
@@ -47,8 +65,8 @@ was dropped the same night because vestibule.com belongs to a New York
 startup, founded in 2025, that sells lease software for commercial real
 estate. No company named Dutch Door turned up in software, AI agents, identity
 or brokerage, but **domain availability and trademarks were not checked**
-(`research/names-and-setup.md`). The name appears in `site/config.js`, the
-`BRAND` environment variable, package names and prose.
+(`research/names-and-setup.md`). The name appears in `site/src/config.ts`,
+the `BRAND` environment variable, package names and prose.
 
 **Zero dependencies in the core.** (Claude for ID)
 The arbiter and the door are a few hundred lines each and should stay

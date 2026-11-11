@@ -10,7 +10,7 @@ site up, get an email address, write to the first dozen. Here is what exists.
 | Thing | State |
 |---|---|
 | Name | **Dutch Door**, a working name for you to confirm. Vestibule was dropped: vestibule.com is a New York commercial real estate software startup. |
-| Site | Built in `site/`, ready to deploy as static files. One config file. A private preview is in your Claude artifacts ("Dutch Door Site Preview"). |
+| Site | Rebuilt in TypeScript on 2026-11-11 after the first version read as a wall of text. Lives in `site/`, builds to static files, one config file. A private preview is in your Claude artifacts ("Dutch Door Site Preview"). |
 | Prototype | Works and is tested: front door, blind-match arbiter, signed buyer profiles, a listing page for people, an MCP endpoint for agents. `npm run demo`. |
 | Plan | `BUSINESS.md`. Read the "How big this is" and "Risks" sections before you send anything. |
 | First dozen | `gtm/first-dozen.md`, with 20 researched brokers behind it and a drafted opening line for each. |
@@ -51,14 +51,16 @@ Steps are in `research/names-and-setup.md`, section 2, "Shared steps". A .com
 should cost about $11 a year. The exact price was not verified; the checkout
 shows it.
 
-**4. Edit `site/config.js`. 5 minutes.**
-Set `DOMAIN`, `EMAIL` and `POSTAL_ADDRESS`. If you change the name, set
-`BRAND` and change or clear `NAME_NOTE`. Commit and push.
+**4. Edit `site/src/config.ts`. 5 minutes.**
+Set `domain`, `email` and `postalAddress`. If you change the name, set
+`brand`. Commit and push.
 
 **5. Deploy the site on Cloudflare Pages. 15 minutes.**
 Workers & Pages, Create application, Pages, Import an existing Git repository.
-Production branch `main`, build command `exit 0`, build output directory
-`site`. Then add the custom domain from the Pages project, not by hand in DNS.
+Production branch `main`, root directory `site`, build command
+`npm run build`, build output directory `dist`. Then add the custom domain
+from the Pages project, not by hand in DNS. These build settings were not
+tested end to end.
 I expect this works with a private repo once you approve GitHub access, but
 that was not verified.
 

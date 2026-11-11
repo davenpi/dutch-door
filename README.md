@@ -15,7 +15,7 @@ gets out until the owner's conditions are met.
 | `START-HERE.md` | Where things stand and what to do next |
 | `BUSINESS.md` | The plan, the numbers, the risks, when to stop |
 | `IDEAS.md` | Everything else that was considered |
-| `site/` | The landing page. Static files, one config file |
+| `site/` | The landing page. TypeScript, builds to static files, one config file |
 | `frontdoor/` | The door: ask, qualify, blind match, book, owner's inbox |
 | `arbiter/` | Two sealed numbers in, one yes or no out |
 | `lib/profile.js` | Signed, portable buyer profile |

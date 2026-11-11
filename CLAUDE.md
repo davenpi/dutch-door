@@ -10,7 +10,7 @@ A business, working name Dutch Door, run by Ian Davenport (ID). It sells a
 "front door" that outside AI agents and people use to deal with a business
 under the owner's rules, plus a neutral blind-match arbiter. First customers:
 US business brokers. The repo holds the prototype, the landing site, and the
-plan. The name is a placeholder; it lives in `site/config.js`, the `BRAND`
+plan. The name is a placeholder; it lives in `site/src/config.ts`, the `BRAND`
 environment variable and prose. Do not hard-code it in new code.
 
 ## How to act here
@@ -35,8 +35,10 @@ environment variable and prose. Do not hard-code it in new code.
 
 ## Code rules
 
-- The core (`lib/`, `arbiter/`, `frontdoor/`) has zero dependencies. Keep it so.
-  Anything that needs a package gets its own folder and `package.json`, like `mcp/`.
+- Everything is TypeScript. The core (`lib/`, `arbiter/`, `frontdoor/`) runs
+  directly on Node with no build step and has zero runtime dependencies. Keep
+  it so. Anything that needs a package at run time gets its own folder and
+  `package.json`, like `mcp/` and `site/`.
 - The decision about what a door may release is made by rules in
   `frontdoor/core.js`, never by a language model. A model may translate
   questions into field names. It may not decide.
@@ -56,7 +58,7 @@ environment variable and prose. Do not hard-code it in new code.
 | `protocol/SPEC.md` | The front door protocol |
 | `arbiter/`, `frontdoor/`, `lib/` | The prototype |
 | `mcp/` | The door as an MCP server |
-| `site/` | The landing page |
+| `site/` | The landing page (Vite, TypeScript). Read `site/README.md` before changing it |
 | `research/` | Sourced research |
 | `gtm/` | Who to contact first, and drafts |
 

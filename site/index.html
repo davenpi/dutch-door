@@ -3,260 +3,131 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A front door for your listings</title>
-<meta name="description" content="A front door for business brokers. It answers buyer questions from your teaser, collects the NDA and proof of funds, and sends you only the buyers worth a call.">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<meta name="color-scheme" content="light">
+<title>A front door for AI agents</title>
+<meta name="description" content="The front door your business gives to AI agents. Open at the top, shut at the bottom.">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
-<header class="top">
-  <div class="wrap top-row">
-    <a class="brand" href="#top" aria-label="Home">
-      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 52V16a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v36" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M14 52h36" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M20 31h24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle class="mark-dot" cx="38" cy="40" r="3.2"/></svg>
-      <span data-brand>Front Door</span>
-    </a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#how">How it works</a>
-      <a href="#price-check">Price check</a>
-      <a href="#questions">Questions</a>
-    </nav>
+<header class="hero" id="top">
+  <div class="flow" id="flow">
+    <div class="glow" id="glow"></div>
+    <canvas id="flow-canvas" aria-hidden="true"></canvas>
+    <p class="door-label door-open" id="label-open"><b>Open</b><span>questions, public facts</span></p>
+    <p class="door-label door-shut" id="label-shut"><b>Shut</b><span>the name, the books, the floor</span></p>
+    <button class="handle" id="handle" type="button" aria-label="Move the door's split. Up and down arrow keys also work."><span>drag</span></button>
+  </div>
+
+  <nav class="bar">
+    <a class="brand" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 28V6h14v22" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M9 16h14" stroke="currentColor" stroke-width="2.6"/><path d="M4 28h24" stroke="currentColor" stroke-width="2.6"/></svg><span data-brand>Dutch Door</span></a>
+    <a class="bar-link" data-email-link href="#pilot">Ask about the pilot</a>
+  </nav>
+
+  <div class="hero-copy">
+    <h1 id="headline"><span class="line l1" id="l1">Open at the top.</span><span class="line l2" id="l2">Shut at the bottom.</span></h1>
+    <p class="sub"><span data-brand>Dutch Door</span> is the front door your business gives to AI agents, and to the people who send them. They can ask, prove who they are and book your time. Nothing confidential leaves until your rules are met.</p>
+    <div class="cta">
+      <a class="btn" data-email-link href="#pilot">Ask about the pilot</a>
+      <span class="mail" data-email-text></span>
+    </div>
   </div>
 </header>
 
-<main id="top">
+<main>
 
-  <!-- 1. Hero -->
-  <section class="hero">
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
-        <p class="eyebrow">For business brokers · Pilot</p>
-        <h1>A front door for your listings that works while you're on the phone.</h1>
-        <p class="lede">It answers buyer questions from your teaser, collects the NDA and proof of funds, and sends you only the buyers worth a call. It works with people today and with their AI agents as those arrive.</p>
+  <section class="plate" id="ask">
+    <h2>Ask it something.</h2>
+    <div class="plate-body">
+      <p class="lead">A made-up listing behind a working door. Try to get the business name out of it.</p>
+      <div class="stage">
+      <form class="ask-form" id="ask-form" autocomplete="off">
+        <label class="sr" for="ask-input">Your question</label>
+        <input id="ask-input" name="q" maxlength="160" placeholder="Type a question" spellcheck="false">
+        <button class="go" type="submit" aria-label="Ask">Ask</button>
+      </form>
+      <div class="chips" id="chips">
+        <button type="button">Why is the owner selling?</button>
+        <button type="button">What's the asking price?</button>
+        <button type="button">What's the business name?</button>
+        <button type="button">What's the lowest they'd take?</button>
+      </div>
+      <div class="answers" id="answers" aria-live="polite">
+        <div class="answer" data-status="answered">
+          <p class="who">Residential heating and cooling company, mid-Atlantic. Fictional.</p>
+          <p class="said">Ask me anything a buyer would.</p>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="plate" id="match">
+    <h2>Two numbers in. One word out.</h2>
+    <div class="plate-body">
+      <p class="lead">The buyer seals the most they would pay. You seal the least your seller would take. Each side learns one thing.</p>
+      <div class="stage">
+      <div class="dials">
+        <div class="dial" data-side="buyer">
+          <label for="buyer-most">Buyer would pay up to</label>
+          <output id="buyer-out" for="buyer-most">$2,400,000</output>
+          <input id="buyer-most" type="range" min="1500000" max="4000000" step="50000" value="2400000">
+        </div>
+        <div class="dial" data-side="seller">
+          <label for="seller-least">Seller would take no less than</label>
+          <output id="seller-out" for="seller-least">$2,100,000</output>
+          <input id="seller-least" type="range" min="1500000" max="4000000" step="50000" value="2100000">
+        </div>
+      </div>
+      <div class="verdict" id="verdict" data-state="idle" aria-live="polite">
+        <button class="btn" id="seal" type="button">Seal and check</button>
+        <p class="word" id="word"></p>
+        <p class="after" id="after">Neither side saw the other's number.</p>
+        <button class="again" id="again" type="button">Try other numbers</button>
+      </div>
+      <p class="fine">One check per buyer, per listing, so nobody can guess their way to the other number. Today a neutral operator runs the check and discards both numbers. That is trust, not cryptography, and we say so.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="plate" id="message">
+    <h2>Then one message reaches you.</h2>
+    <div class="plate-body">
+      <p class="lead">An example. You hear from buyers who cleared your rules, and from nobody else.</p>
+      <ul class="receipt stage">
+        <li>Identity verified</li>
+        <li>Funds verified</li>
+        <li>NDA signed</li>
+        <li>A deal is possible</li>
+        <li>Call Thursday, 10:00</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="plate close" id="pilot">
+    <h2>Every business will have one.</h2>
+    <div class="plate-body">
+      <p class="lead">We are starting with business brokers. The first dozen are set up by hand, at no charge. For now a person on our side checks each buyer's paperwork.</p>
+      <div class="stage">
         <div class="cta">
-          <a class="btn" data-email-link data-subject="pilot" href="#contact">Ask about the pilot</a>
-          <a class="btn btn-quiet" data-calendar hidden href="#contact">Book a 15-minute call</a>
-          <span class="cta-mail" data-email-text></span>
+          <a class="btn" data-email-link href="#pilot">Ask about the pilot</a>
+          <a class="btn quiet" data-calendar hidden href="#pilot">Book 15 minutes</a>
+          <span class="mail" data-email-text></span>
         </div>
-        <noscript><p class="note">Turn on JavaScript to see our contact details.</p></noscript>
-      </div>
-
-      <aside class="summary" aria-label="Example of the summary a broker receives">
-        <p class="label">Example of what lands in your inbox</p>
-        <dl>
-          <div><dt>Listing</dt><dd>Residential HVAC company, from your blind teaser</dd></div>
-          <div><dt>Buyer</dt><dd>Identity verified. Funds verified. NDA signed.</dd></div>
-          <div><dt>Questions</dt><dd>Five answered from the teaser, one sent to you</dd></div>
-          <div><dt>Price check</dt><dd><span class="pill pill-ok">A deal is possible</span></dd></div>
-          <div><dt>Call</dt><dd>Thursday, 10:00</dd></div>
-        </dl>
-        <p class="fine">The details are invented for illustration.</p>
-      </aside>
-    </div>
-  </section>
-
-  <!-- 2. The problem -->
-  <section class="band" id="problem">
-    <div class="wrap band-grid">
-      <p class="label band-label">The problem</p>
-      <div class="band-body">
-        <h2>Every listing draws a pile of inquiries. Few of them are buyers.</h2>
-        <div class="two">
-          <div class="prose">
-            <p>Most never sign the NDA. Some sign it and cannot fund the deal. The serious buyer waits in the same queue as everyone else, and you find out who is who one phone call at a time.</p>
-            <p>The questions are the same on every listing, and you answer them again for each new name.</p>
-          </div>
-          <div class="queue" aria-label="An illustration of a broker's inquiry queue">
-            <ul>
-              <li><span class="q">"Is this still available?"</span><span class="pill">Never signs the NDA</span></li>
-              <li><span class="q">"Send me the financials."</span><span class="pill">Never signs the NDA</span></li>
-              <li><span class="q">"What's the address?"</span><span class="pill">Wants details first</span></li>
-              <li class="serious"><span class="q">"NDA signed. Lender letter attached."</span><span class="pill pill-ok">The buyer you want, waiting in line</span></li>
-              <li><span class="q">"Just looking around."</span><span class="pill">Cannot fund the deal</span></li>
-            </ul>
-            <p class="fine">An illustration of the queue, not data.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3. How it works -->
-  <section class="band" id="how">
-    <div class="wrap band-grid">
-      <p class="label band-label">How it works</p>
-      <div class="band-body">
-        <h2>Three steps before your phone rings</h2>
-        <ol class="steps">
-          <li>
-            <span class="step-n">1</span>
-            <h3>Ask</h3>
-            <p>A buyer asks about the listing. The front door answers from your blind teaser and nothing else. A question it cannot answer comes to you.</p>
-          </li>
-          <li>
-            <span class="step-n">2</span>
-            <h3>Qualify</h3>
-            <p>It applies your rules for that listing: a signed NDA, a buyer profile, proof of funds. A buyer who stops here never reaches your inbox.</p>
-          </li>
-          <li>
-            <span class="step-n">3</span>
-            <h3>Introduce</h3>
-            <p>You get a short summary of the buyer and a call at one of the times you offered. You take it from there.</p>
-          </li>
-        </ol>
-
-        <div class="control">
-          <h3>What you control</h3>
-          <ul class="checks">
-            <li>Nothing confidential is released before your conditions are met.</li>
-            <li>You set the rules for each listing.</li>
-            <li>You see a log of every exchange.</li>
-          </ul>
-          <p class="fine name-note" data-name-note hidden></p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4. Blind price check -->
-  <section class="band" id="price-check">
-    <div class="wrap band-grid">
-      <p class="label band-label">Blind price check</p>
-      <div class="band-body">
-        <h2>A price check where nobody shows their number</h2>
-        <div class="two">
-          <div class="prose">
-            <p>The buyer privately enters the most they would pay. You privately enter the least your seller would take. Both of you get one answer: a deal is possible, or there is no overlap.</p>
-            <p>A person cannot do this job. Once someone has heard your walk-away price, they cannot unsee it.</p>
-            <p>A neutral service can compare two numbers, answer yes or no, and discard both. You skip weeks of talks with a buyer who was never in range.</p>
-          </div>
-
-          <div class="demo" role="group" aria-labelledby="demo-title">
-            <p class="label" id="demo-title">Demonstration</p>
-            <p class="fine demo-note">It runs in your browser and sends nothing anywhere. Example numbers are filled in. The real service allows one check per buyer per listing, so nobody can guess their way to the other number.</p>
-
-            <div class="field field-buyer">
-              <label for="buyer-most"><span class="chip chip-buyer" aria-hidden="true"></span>Buyer's most</label>
-              <div class="input-row">
-                <span class="dollar" aria-hidden="true">$</span>
-                <input id="buyer-most" type="password" inputmode="decimal" autocomplete="off" spellcheck="false" data-1p-ignore data-lpignore="true" value="2,400,000">
-                <button type="button" class="toggle" id="buyer-toggle" aria-controls="buyer-most" aria-pressed="false">Show</button>
-              </div>
-            </div>
-
-            <div class="field field-seller">
-              <label for="seller-least"><span class="chip chip-seller" aria-hidden="true"></span>Seller's least</label>
-              <div class="input-row">
-                <span class="dollar" aria-hidden="true">$</span>
-                <input id="seller-least" type="password" inputmode="decimal" autocomplete="off" spellcheck="false" data-1p-ignore data-lpignore="true" value="2,100,000">
-                <button type="button" class="toggle" id="seller-toggle" aria-controls="seller-least" aria-pressed="false">Show</button>
-              </div>
-            </div>
-
-            <button type="button" class="btn demo-check" id="check">Check</button>
-
-            <div class="result" id="result" data-state="idle" aria-live="polite">
-              <p class="result-main" id="result-main">Press Check to compare the two numbers.</p>
-              <p class="result-sub" id="result-sub" hidden>Neither side learns the other's number.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 5. Buyers and their agents -->
-  <section class="band" id="buyers">
-    <div class="wrap band-grid">
-      <p class="label band-label">For buyers</p>
-      <div class="band-body">
-        <h2>For buyers and their agents</h2>
-        <div class="pair">
-          <div>
-            <h3>One address per listing</h3>
-            <p>Each listing gets one address. A buyer can open it in a browser to read the facts, ask questions and request access. A buyer's AI agent can use the same address directly, at any hour, and get the same answers.</p>
-          </div>
-          <div>
-            <h3>One profile, reused</h3>
-            <p>A verified buyer profile carries identity, proof of funds, and what the buyer's agent is allowed to agree to. The buyer sets it up once and reuses it across listings.</p>
-          </div>
-        </div>
-        <div class="tech">
-          <p class="label">For technical readers</p>
-          <p>Each front door publishes a machine-readable description of what it can answer and what it requires. Agents reach it over HTTPS. The buyer profile is a signed credential the front door can verify. The price check is a separate service that both sides call. Write to us for the developer notes.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 6. Status -->
-  <section class="band" id="status">
-    <div class="wrap band-grid">
-      <p class="label band-label">Where this stands</p>
-      <div class="band-body">
-        <h2>We are setting up the first dozen brokers by hand.</h2>
-        <div class="prose">
-          <p>There is no charge during the pilot. We set up one of your listings with you, watch how buyers use it, and change what does not work. For now a person on our side checks each buyer's NDA and proof of funds before that buyer reaches you.</p>
-          <p>Built by people who buy small businesses. We send buyer inquiries ourselves, so we know what the queue looks like from the other side.</p>
-          <p class="founder" data-founder-wrap hidden>Founder: <span data-founder></span></p>
-        </div>
-        <div class="cta" id="contact">
-          <a class="btn" data-email-link data-subject="pilot" href="#contact">Ask about the pilot</a>
-          <a class="btn btn-quiet" data-calendar hidden href="#contact">Book a 15-minute call</a>
-          <span class="cta-mail" data-email-text></span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 7. Questions -->
-  <section class="band" id="questions">
-    <div class="wrap band-grid">
-      <p class="label band-label">Questions</p>
-      <div class="band-body">
-        <h2>What brokers ask first</h2>
-        <dl class="faq">
-          <div>
-            <dt>Does it replace me?</dt>
-            <dd>No. It handles the first questions and the paperwork check. Judging the buyer, managing the seller and making the deal stay with you.</dd>
-          </div>
-          <div>
-            <dt>What about confidentiality?</dt>
-            <dd>It works from the blind teaser until your conditions are met. The business name, the address and the financials stay with you until then, and you decide what is released after.</dd>
-          </div>
-          <div>
-            <dt>How private is the price check?</dt>
-            <dd>The service compares the two numbers, reports yes or no to both sides, then discards them. The log keeps no numbers. Today this rests on trusting a neutral operator, not on cryptography.</dd>
-          </div>
-          <div>
-            <dt>Do buyers need an AI agent?</dt>
-            <dd>No. A buyer can use the front door in a browser. Agents are welcome when they arrive.</dd>
-          </div>
-          <div>
-            <dt>What does it cost?</dt>
-            <dd>Nothing during the pilot. Pricing comes after we learn what it is worth to you.</dd>
-          </div>
-        </dl>
+        <p class="fine founder" data-founder-wrap hidden>Founder: <span data-founder></span></p>
       </div>
     </div>
   </section>
 
 </main>
 
-<!-- 8. Footer -->
 <footer class="foot">
-  <div class="wrap foot-row">
-    <span class="foot-brand" data-brand>Front Door</span>
-    <a class="foot-mail" data-email-link data-email-text href="#contact"></a>
-    <span class="foot-postal" data-postal hidden></span>
-    <span class="foot-stage">Pilot stage</span>
-  </div>
+  <span data-brand>Dutch Door</span>
+  <a data-email-link data-email-text href="#pilot"></a>
+  <span data-postal hidden></span>
+  <span>Pilot stage</span>
 </footer>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script type="module" src="/src/main.ts"></script>
 </body>
 </html>
