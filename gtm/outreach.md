@@ -42,6 +42,20 @@ your practice?
 Ian Davenport
 [phone]
 [postal address]
+If you would rather not hear from me again, reply and say so.
+
+Notes on this email:
+
+- The last two lines are there for a reason. US law (CAN-SPAM) covers
+  one-to-one business email too. It asks for an honest subject, a real postal
+  address (a street address, a PO box or a registered private mailbox all
+  count) and a way to opt out that you honor. See
+  `research/names-and-setup.md`, section 3. Not legal advice.
+- On day one, send from an address with history and consider leaving the site
+  link out, offering to send it in your reply. A domain registered that
+  morning sits on a spam blocklist for its first 24 hours.
+- No attachments, no tracking pixels, no link shorteners, no mail-merge tool.
+  Write each one.
 
 ## Shorter version, for a contact form
 
